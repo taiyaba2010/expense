@@ -1,1 +1,41 @@
+document.getElementById('expense-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const date = document.getElementById('date').value;
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+    const amount = parseFloat(document.getElementById('amount').value);
 
+    const response = await fetch('/expenses', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ date, category, description, amount })
+    });
+
+    if (response.ok) {
+        alert('Expense added!');
+        loadData();
+    } else {
+        alert('Error adding expense');
+    }
+});
+
+async function loadData() {
+    const response = await fetch('/expenses');
+    const expenses = await response.json();
+
+    const tableBody = document.getElementById('expense-body');
+    tableBody.innerHTML = '';
+
+    expenses.forEach(expense => {
+        const rowElement = document.createElement('tr');
+        const row = [expense.date, expense.category, expense.description, `$${expense.amount.toFixed(2)}`];
+        row.forEach(cell => {
+            const cellElement = document.createElement('td');
+            cellElement.textContent = cell;
+            rowElement.appendChild(cellElement);
+        });
+        tableBody.appendChild(rowElement);
+    });
+}
